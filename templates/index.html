@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4f5ff">
+  <meta name="description" content="Laboratorium interaktif gerak parabola — Simulasi Burung Informatika kelas XI.">
+  <title>Flight Lab — Simulasi Burung</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Flight Lab beranda">
+      <span class="brand-mark">✦</span>
+      <span class="brand-copy"><strong>FLIGHT LAB</strong><small>SIMULASI BURUNG</small></span>
+    </a>
+    <div class="topbar-right">
+      <span class="class-chip">KELOMPOK 1 / XI-I</span>
+      <span class="offline-chip"><i></i> INFORMATIKA XI</span>
+    </div>
+  </header>
+
+  <main class="page-wrap">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> DANIEL - IRANIA - KINAN - QUEEN - RAIMEE</p>
+        <h1>Seberapa jauh<br><span>Boro bisa terbang?</span></h1>
+        <p class="hero-description">
+          Uji gerak parabola, ubah parameter peluncuran, dan lihat bagaimana
+          matematika menggerakkan sebuah cerita.
+        </p>
+        <div class="hero-tags">
+          <span>01—04 / EMPAT SUBPROBLEM</span>
+          <span>GLBB</span>
+          <span>PROJECTILE MOTION</span>
+        </div>
+      </div>
+      <div class="hero-sticker" aria-hidden="true">
+        <div class="sticker-orbit"></div>
+        <div class="sticker-bird">🐦</div>
+        <span class="sticker-spark spark-a">✦</span>
+        <span class="sticker-spark spark-b">✧</span>
+        <span class="sticker-note">READY<br>TO FLY!</span>
+      </div>
+    </section>
+
+    <section class="workspace" id="workspace">
+      <div class="stage-column">
+        <div class="stage-card">
+          <div class="stage-topline">
+            <div>
+              <span class="live-dot"></span>
+              <span class="stage-label">LIVE SIMULATION</span>
+            </div>
+            <span class="stage-mode" id="stageMode">SIMULASI UMUM</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="flightCanvas" aria-label="Animasi lintasan gerak parabola"></canvas>
+            <div class="canvas-legend">
+              <span><i class="legend-arc"></i> Lintasan</span>
+              <span><i class="legend-bird"></i> Boro</span>
+              <span><i class="legend-ground"></i> Permukaan tanah</span>
+            </div>
+            <div class="canvas-callout" id="canvasCallout">
+              <span class="callout-icon">✦</span>
+              <span id="calloutText">Boro siap diluncurkan!</span>
+            </div>
+          </div>
+          <div class="stage-toolbar">
+            <div class="play-controls">
+              <button type="button" class="icon-button primary-button" id="playBtn" title="Mulai atau lanjutkan animasi">▶ <span>Mulai</span></button>
+              <button type="button" class="icon-button" id="pauseBtn" title="Jeda animasi">Ⅱ <span>Pause</span></button>
+              <button type="button" class="icon-button" id="backBtn" title="Kembali ke titik peluncuran">↤ <span>Kembali</span></button>
+            </div>
+            <div class="toolbar-right">
+              <div class="zoom-controls" aria-label="Kontrol zoom">
+                <button class="icon-button compact-button" id="zoomOutBtn" title="Zoom out">−</button>
+                <button class="icon-button compact-button" id="zoomFitBtn" title="Sesuaikan tampilan">Fit</button>
+                <button class="icon-button compact-button" id="zoomInBtn" title="Zoom in">+</button>
+              </div>
+              <label class="speed-control">Kecepatan
+                <select id="playbackSpeed" aria-label="Kecepatan animasi">
+                  <option value="0.5">0.5×</option>
+                  <option value="1" selected>1×</option>
+                  <option value="2">2×</option>
+                  <option value="4">4×</option>
+                </select>
+              </label>
+              <label class="toggle-label"><input type="checkbox" id="trailToggle" checked><span class="toggle-ui"></span> Jejak lintasan</label>
+              <span class="scale-label" id="scaleLabel">SKALA OTOMATIS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="metric-card metric-featured">
+            <div class="metric-icon">↗</div>
+            <div class="metric-label">JARAK HORIZONTAL</div>
+            <div class="metric-value"><span id="rangeValue">9.6</span><small>m</small></div>
+            <div class="metric-foot">Jarak terjauh (R)</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon lilac">⌃</div>
+            <div class="metric-label">TINGGI MAKSIMUM</div>
+            <div class="metric-value"><span id="heightValue">1.81</span><small>m</small></div>
+            <div class="metric-foot">Dari titik peluncuran</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon peach">◷</div>
+            <div class="metric-label">WAKTU TERBANG</div>
+            <div class="metric-value"><span id="timeValue">1.204</span><small>s</small></div>
+            <div class="metric-foot">Sampai kembali ke tanah</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon mint">⇢</div>
+            <div class="metric-label">KECEPATAN Vx</div>
+            <div class="metric-value"><span id="vxValue">7.99</span><small>m/s</small></div>
+            <div class="metric-foot">Komponen horizontal</div>
+          </article>
+        </div>
+      </div>
+
+      <aside class="control-card">
+        <div class="control-heading">
+          <div>
+            <p class="eyebrow">CONTROL DECK</p>
+            <h2>Atur peluncuran</h2>
+          </div>
+          <span class="control-number">01—04</span>
+        </div>
+
+        <div class="mode-tabs" role="tablist" aria-label="Mode simulasi">
+          <button class="mode-tab active" data-mode="assignment" role="tab" aria-selected="true">Simulasi</button>
+          <button class="mode-tab" data-mode="lab" role="tab" aria-selected="false">Lab bebas</button>
+          <button class="mode-tab" data-mode="compare" role="tab" aria-selected="false">Bandingkan</button>
+          <button class="mode-tab" data-mode="challenge" role="tab" aria-selected="false">Tantangan</button>
+        </div>
+
+        <div class="mode-description" id="modeDescription">
+          <strong>Mode simulasi umum</strong>
+          <span>Atur sudut dan kecepatan sendiri untuk mengamati gerak parabola.</span>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <label for="angleInput">Sudut peluncuran <span class="unit">(S)</span></label>
+            <output id="angleOutput">37°</output>
+          </div>
+          <input class="range-input angle-range" id="angleInput" type="range" min="0" max="90" step="1" value="37">
+          <div class="range-ends"><span>0°</span><span>90°</span></div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label-row">
+            <label for="speedInput">Kecepatan awal <span class="unit">(V)</span></label>
+            <output id="speedOutput">10 m/s</output>
+          </div>
+          <input class="range-input speed-range" id="speedInput" type="range" min="0" max="100" step="1" value="10">
+          <div class="range-ends"><span>0 m/s</span><span>100 m/s</span></div>
+        </div>
+
+        <div class="control-group lab-only hidden">
+          <div class="control-label-row">
+            <label for="gravityInput">Gravitasi <span class="unit">(g)</span></label>
+            <output id="gravityOutput">9.81 m/s²</output>
+          </div>
+          <input class="range-input gravity-range" id="gravityInput" type="range" min="1" max="30" step="0.01" value="9.81">
+          <div class="planet-pills">
+            <button data-gravity="1.62">🌙 Bulan</button>
+            <button data-gravity="3.71">🔴 Mars</button>
+            <button class="selected" data-gravity="9.81">🌍 Bumi</button>
+            <button data-gravity="24.79">🪐 Jupiter</button>
+          </div>
+        </div>
+
+        <div class="control-group lab-only hidden">
+          <div class="control-label-row">
+            <label for="launchHeightInput">Tinggi peluncuran</label>
+            <output id="launchHeightOutput">0 m</output>
+          </div>
+          <input class="range-input height-range" id="launchHeightInput" type="range" min="0" max="50" step="1" value="0">
+          <div class="range-ends"><span>0 m</span><span>50 m</span></div>
+        </div>
+
+        <div class="control-group challenge-only hidden">
+          <div class="control-label-row">
+            <label for="targetInput">Jarak target</label>
+            <output id="targetOutput">10 m</output>
+          </div>
+          <input class="range-input target-range" id="targetInput" type="range" min="1" max="100" step="1" value="10">
+          <div class="range-ends"><span>1 m</span><span>100 m</span></div>
+        </div>
+
+        <div class="fixed-gravity" id="fixedGravity">
+          <span class="fixed-icon">g</span>
+          <span><strong>Gravitasi soal: 10 m/s²</strong><small>Nilai tetap sesuai instruksi buku</small></span>
+          <span class="lock-icon">🔒</span>
+        </div>
+
+        <button class="launch-button" id="launchBtn"><span>🚀</span> Luncurkan Boro <b>→</b></button>
+        <p class="control-hint" id="controlHint">Geser parameter, lalu tekan Luncurkan untuk melihat hasilnya.</p>
+        <div class="challenge-result hidden" id="challengeResult"></div>
+      </aside>
+    </section>
+
+    <section class="lower-grid">
+      <article class="info-card formula-card">
+        <div class="section-kicker">FORMULA CORNER <span>01</span></div>
+        <h2>Rumus di balik penerbangan</h2>
+        <p>Untuk Soal 1, jarak horizontal terjauh dihitung ketika benda kembali ke ketinggian awal.</p>
+        <div class="formula-display">
+          <span class="formula-name">Jarak horizontal</span>
+          <strong>R = <span>V² · sin(2θ)</span> / g</strong>
+        </div>
+        <div class="formula-notes">
+          <span><b>V</b> = kecepatan awal</span>
+          <span><b>θ</b> = sudut peluncuran</span>
+          <span><b>g</b> = gravitasi (10 m/s²)</span>
+        </div>
+        <div class="calculation-line" id="calculationLine">R = (10² × sin 74°) / 10 = 9.6 m</div>
+      </article>
+
+      <article class="info-card insight-card">
+        <div class="section-kicker">FLIGHT INSIGHT <span>02</span></div>
+        <h2 id="insightTitle">Sudut dan jarak</h2>
+        <p id="insightText">Pada kondisi ideal dengan titik awal dan akhir setinggi sama, sudut 45° menghasilkan jarak terjauh untuk kecepatan awal yang sama.</p>
+        <div class="insight-bottom">
+          <div class="insight-badge">✦</div>
+          <span>Eksperimen dengan mengubah sudut dan kecepatan untuk melihat perbedaannya.</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="compare-section hidden" id="compareSection">
+      <div class="section-heading">
+        <div><p class="eyebrow">ANGLE STUDY</p><h2>Bandingkan beberapa sudut</h2></div>
+        <span class="section-note">Kecepatan dibuat sama</span>
+      </div>
+      <div class="comparison-table-wrap">
+        <table class="comparison-table">
+          <thead><tr><th>Sudut</th><th>Jarak horizontal</th><th>Tinggi maksimum</th><th>Waktu terbang</th></tr></thead>
+          <tbody id="comparisonBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="learning-center" id="learningCenter">
+      <div class="learning-heading">
+        <div>
+          <p class="eyebrow">LEARNING MODE · INFORMATIKA XI</p>
+          <h2>Ruang belajar <span>Soal 1–4</span></h2>
+          <p>Pilih subproblem, baca deskripsinya, masukkan data, lalu ikuti tutorial sampai memahami hasilnya.</p>
+        </div>
+        <div class="learning-stamp"><strong>4</strong><span>SUBPROBLEM<br>TERINTEGRASI</span></div>
+      </div>
+
+      <div class="lesson-tabs" role="tablist" aria-label="Pilih subproblem">
+        <button class="lesson-tab active" data-lesson="1" role="tab" aria-selected="true"><b>01</b><span>Jarak horizontal</span></button>
+        <button class="lesson-tab" data-lesson="2" role="tab" aria-selected="false"><b>02</b><span>Waktu terbang</span></button>
+        <button class="lesson-tab" data-lesson="3" role="tab" aria-selected="false"><b>03</b><span>Prediksi tinggi</span></button>
+        <button class="lesson-tab" data-lesson="4" role="tab" aria-selected="false"><b>04</b><span>Banyak burung</span></button>
+      </div>
+
+      <div class="lesson-layout">
+        <article class="lesson-card">
+          <div class="lesson-card-top">
+            <span class="lesson-number" id="lessonNumber">SUBPROBLEM 01</span>
+            <span class="book-chip">📘 BERDASARKAN BUKU</span>
+          </div>
+          <h3 id="lessonTitle">Menghitung Jarak Horizontal Terjauh</h3>
+          <p class="lesson-description" id="lessonDescription">Hitung jarak horizontal terjauh yang dapat ditempuh Boro ketika diluncurkan dengan ketapel.</p>
+
+          <div class="lesson-spec-grid">
+            <div class="lesson-spec">
+              <h4><span>⌨</span> Format masukan</h4>
+              <p id="lessonInputFormat">Baris pertama S (sudut peluncuran 0–90°). Baris kedua V (kecepatan awal). Gravitasi diasumsikan 10 m/s².</p>
+            </div>
+            <div class="lesson-spec">
+              <h4><span>↗</span> Format keluaran</h4>
+              <p id="lessonOutputFormat">Satu bilangan yang menunjukkan jarak horizontal terjauh Boro mendarat di tanah.</p>
+            </div>
+          </div>
+
+          <div class="sample-card">
+            <div class="sample-card-heading"><strong>Contoh dari buku</strong><span id="sampleNote">Sudut 37° · Kecepatan 10 m/s</span></div>
+            <div class="sample-columns">
+              <div><span>CONTOH MASUKAN</span><pre id="lessonSampleInput">37
+10</pre></div>
+              <div><span>CONTOH KELUARAN</span><pre id="lessonSampleOutput">9.6</pre></div>
+            </div>
+          </div>
+
+          <div class="assumption-note">
+            <span>✦</span>
+            <p><strong>Asumsi model:</strong> gravitasi 10 m/s², ketinggian awal 0 m, dan hambatan udara diabaikan. Ini adalah model gerak parabola ideal.</p>
+          </div>
+        </article>
+
+        <div class="lesson-side-stack">
+        <aside class="lesson-interactive-card">
+          <div class="lesson-interactive-heading">
+            <p class="eyebrow">TRY IT YOURSELF</p>
+            <h3>Masukkan data soal</h3>
+            <p id="lessonInputHint">Atur nilai sudut dan kecepatan awal, lalu hitung hasilnya.</p>
+          </div>
+
+          <div id="singleBirdFields">
+            <label class="lesson-field">
+              <span>Sudut peluncuran <small>(S)</small></span>
+              <div><input id="lessonAngle" type="number" min="0" max="90" step="1" value="37"><em>derajat</em></div>
+            </label>
+            <label class="lesson-field">
+              <span>Kecepatan awal <small>(V)</small></span>
+              <div><input id="lessonSpeed" type="number" min="0" max="10000" step="0.1" value="10"><em>m/s</em></div>
+            </label>
+            <label class="lesson-field hidden" id="treeHeightField">
+              <span>Tinggi pohon <small>(T)</small></span>
+              <div><input id="lessonTreeHeight" type="number" min="0" max="100000" step="0.1" value="100"><em>meter</em></div>
+            </label>
+          </div>
+
+          <div id="multiBirdFields" class="hidden">
+            <label class="lesson-field">
+              <span>Jumlah burung <small>(N)</small></span>
+              <div><input id="birdCount" type="number" min="1" max="50" step="1" value="2"><em>burung</em></div>
+            </label>
+            <div class="bird-rows-heading"><strong>Data setiap burung</strong><span>S · V · T</span></div>
+            <div id="birdRows"></div>
+            <button type="button" class="add-bird-button" id="addBirdButton">＋ Tambah burung</button>
+          </div>
+
+          <div class="lesson-actions">
+            <button type="button" class="sample-button" id="loadExampleButton">↺ Gunakan contoh buku</button>
+            <button type="button" class="solve-button" id="solveProblemButton">Hitung jawaban <span>→</span></button>
+          </div>
+          <button type="button" class="simulation-link-button" id="useInSimulationButton">🎮 Tampilkan data di simulasi atas</button>
+
+          <div class="problem-result hidden" id="problemResult" aria-live="polite">
+            <div class="result-heading"><span>✓</span><strong>Hasil Perhitungan</strong></div>
+            <pre id="problemOutput"></pre>
+            <p id="problemExplanation"></p>
+          </div>
+          <p class="input-error hidden" id="problemError" role="alert"></p>
+        </aside>
+
+        <aside class="lesson-preview-card" aria-label="Animasi Boro untuk soal yang dipilih">
+          <div class="preview-card-heading">
+            <div>
+              <p class="eyebrow">ANIMASI SOAL</p>
+              <h3>Perjalanan Boro</h3>
+              <p id="lessonPreviewCaption">Animasi otomatis mengikuti data soal yang sedang dipilih.</p>
+            </div>
+            <span class="preview-live-pill"><i></i> LIVE</span>
+          </div>
+
+          <div class="lesson-preview-stage">
+            <canvas id="lessonPreviewCanvas" aria-label="Pratinjau animasi lintasan Boro"></canvas>
+            <span class="preview-stage-label" id="previewStageLabel">SOAL 1</span>
+            <span class="preview-direction-label" id="previewDirectionLabel">MAJU</span>
+          </div>
+
+          <div class="preview-metrics">
+            <div><span>Jarak</span><strong id="previewRange">9.6 m</strong></div>
+            <div><span>Tinggi maks.</span><strong id="previewHeight">1.81 m</strong></div>
+            <div><span>Waktu</span><strong id="previewTime">1.204 s</strong></div>
+          </div>
+
+          <div class="preview-controls">
+            <div class="preview-control-row">
+              <button type="button" class="preview-action-button preview-play-button" id="previewPlayBtn">▶ Mulai</button>
+              <button type="button" class="preview-action-button" id="previewPauseBtn">Ⅱ Pause</button>
+              <button type="button" class="preview-action-button" id="previewBackBtn">↤ Kembali</button>
+            </div>
+            <div class="preview-control-row preview-control-secondary">
+              <div class="zoom-controls">
+                <button type="button" class="icon-button compact-button" id="previewZoomOutBtn" title="Zoom out">−</button>
+                <button type="button" class="icon-button compact-button" id="previewZoomFitBtn" title="Auto fit">Fit</button>
+                <button type="button" class="icon-button compact-button" id="previewZoomInBtn" title="Zoom in">+</button>
+                <span class="zoom-readout" id="previewZoomLabel">FIT</span>
+              </div>
+              <label class="speed-control">Kecepatan
+                <select id="previewSpeed" aria-label="Kecepatan pratinjau">
+                  <option value="0.5">0.5×</option>
+                  <option value="1" selected>1×</option>
+                  <option value="2">2×</option>
+                  <option value="4">4×</option>
+                </select>
+              </label>
+            </div>
+            <div class="preview-customize-row">
+              <label for="costumeSelect">Kostum Boro</label>
+              <select id="costumeSelect">
+                <option value="classic">Boro klasik</option>
+                <option value="pilot">Pilot langit</option>
+                <option value="explorer">Penjelajah</option>
+                <option value="royal">Raja langit</option>
+                <option value="astronaut">Astronaut</option>
+                <option value="scientist">Ilmuwan</option>
+                <option value="gardener">Penjaga taman</option>
+                <option value="racer">Pembalap</option>
+              </select>
+            </div>
+            <div class="palette-picker" aria-label="Palet warna siap pakai">
+              <span>Palet warna</span>
+              <div class="palette-buttons">
+                <button type="button" class="palette-button selected" data-palette="flightlab" title="Palet Flight Lab">Flight Lab</button>
+                <button type="button" class="palette-button" data-palette="ocean" title="Palet Samudra">Samudra</button>
+                <button type="button" class="palette-button" data-palette="sunset" title="Palet Senja">Senja</button>
+                <button type="button" class="palette-button" data-palette="forest" title="Palet Hutan">Hutan</button>
+              </div>
+            </div>
+            <div class="character-colors" aria-label="Kustomisasi warna seluruh bagian Boro">
+              <label class="color-choice" for="boroBodyColor">
+                <span>Bulu utama</span>
+                <input type="color" id="boroBodyColor" value="#2baE9f" aria-label="Pilih warna bulu utama Boro">
+              </label>
+              <label class="color-choice" for="boroWingColor">
+                <span>Sayap</span>
+                <input type="color" id="boroWingColor" value="#76d8c7" aria-label="Pilih warna sayap Boro">
+              </label>
+              <label class="color-choice" for="boroAccessoryColor">
+                <span>Kostum</span>
+                <input type="color" id="boroAccessoryColor" value="#6256d9" aria-label="Pilih warna kostum Boro">
+              </label>
+              <label class="color-choice" for="boroAccentColor">
+                <span>Aksen</span>
+                <input type="color" id="boroAccentColor" value="#f27d6b" aria-label="Pilih warna aksen Boro">
+              </label>
+              <label class="color-choice" for="boroBeakColor">
+                <span>Paruh</span>
+                <input type="color" id="boroBeakColor" value="#f4b64d" aria-label="Pilih warna paruh Boro">
+              </label>
+              <label class="color-choice" for="boroFeetColor">
+                <span>Kaki</span>
+                <input type="color" id="boroFeetColor" value="#d58a52" aria-label="Pilih warna kaki Boro">
+              </label>
+              <button type="button" class="color-reset-button" id="resetBoroColors">Kembalikan warna awal</button>
+            </div>
+            <p class="costume-description" id="costumeDescription">Pilih satu dari delapan kostum, gunakan palet siap pakai, atau atur warna setiap bagian Boro. Perubahan berlaku di semua animasi.</p>
+          </div>
+          <p class="preview-footnote">Pilih soal atau ubah angka di atas.</p>
+        </aside>
+        </div>
+      </div>
+
+      <article class="tutorial-card">
+        <div class="tutorial-header">
+          <div class="tutorial-icon">🧭</div>
+          <div class="tutorial-header-copy">
+            <p class="eyebrow">GUIDED LEARNING</p>
+            <h3>Mode penjelasan & tutorial</h3>
+            <p>Ikuti petunjuk satu per satu: pilih soal, masukkan data, tekan tombol hitung, dan pahami keluarannya.</p>
+          </div>
+          <button type="button" id="tutorialToggle" class="tutorial-start-button">Mulai tutorial <span>↗</span></button>
+        </div>
+        <div id="tutorialContent" class="tutorial-content hidden">
+          <div class="tutorial-progress-row">
+            <span id="tutorialStepCounter">LANGKAH 1 / 4</span>
+            <div id="tutorialDots" class="tutorial-dots"></div>
+          </div>
+          <h4 id="tutorialStepTitle">Kenali informasi pada soal</h4>
+          <p id="tutorialStepText">Baca data yang diketahui dan tentukan apa yang diminta.</p>
+          <div id="tutorialFormula" class="tutorial-formula"></div>
+          <div class="tutorial-navigation">
+            <button type="button" id="tutorialPrev" disabled>← Sebelumnya</button>
+            <button type="button" id="tutorialNext">Langkah berikutnya →</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-brand"><span class="brand-mark">✦</span><strong>FLIGHT LAB</strong></div>
+      <span>Proyek Informatika Kelas XI · Gerak Parabola</span>
+      <span>Kelompok 1 / XI-I</span>
+    </footer>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/animation.js') }}"></script>
+</body>
+</html>
