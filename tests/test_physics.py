@@ -1,43 +1,14 @@
-"""Pengujian mesin Fisika Flight Lab untuk Subproblem 1–4."""
+"""Pengujian mesin fisika Flight Lab."""
 
 import unittest
-
-from physics import (
-    compare_angles,
-    simulate_projectile,
-    solve_subproblem_1,
-    solve_subproblem_2,
-    solve_subproblem_3,
-    solve_subproblem_4,
-)
+from physics import simulate_projectile, compare_angles, solve_question
 
 
 class ProjectileTests(unittest.TestCase):
-    def test_subproblem_1_textbook_example(self):
-        result = solve_subproblem_1(37, 10)
-        self.assertEqual(result["rounded_range"], 9.6)
-
-    def test_subproblem_2_textbook_example(self):
-        result = solve_subproblem_2(37, 100)
-        self.assertEqual(round(result["flight_time"], 3), 12.036)
-
-    def test_subproblem_3_status_one(self):
-        result = solve_subproblem_3(37, 100, 100)
-        self.assertEqual(result["status"], 1)
-        self.assertAlmostEqual(result["max_height"], 181.09, places=2)
-
-    def test_subproblem_3_status_zero(self):
-        result = solve_subproblem_3(37, 100, 200)
-        self.assertEqual(result["status"], 0)
-        self.assertAlmostEqual(result["max_height"], 181.09, places=2)
-
-    def test_subproblem_4_two_birds(self):
-        result = solve_subproblem_4([
-            {"angle": 37, "speed": 100, "tree_height": 100},
-            {"angle": 37, "speed": 100, "tree_height": 200},
-        ])
-        self.assertEqual(result["count"], 2)
-        self.assertEqual([bird["status"] for bird in result["birds"]], [1, 0])
+    def test_textbook_example_soal_1(self):
+        # Contoh dari file proyek: sudut 37°, kecepatan 10 m/s, g = 10.
+        result = simulate_projectile(37, 10, 10, 0)
+        self.assertEqual(round(result["range"], 1), 9.6)
 
     def test_angle_45_gives_max_range_for_equal_heights(self):
         result_45 = simulate_projectile(45, 20, 10, 0)
@@ -59,21 +30,31 @@ class ProjectileTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             simulate_projectile(100, 10, 10, 0)
 
-    def test_fractional_school_angle_is_rejected(self):
-        with self.assertRaises(ValueError):
-            solve_subproblem_1(37.5, 10)
-
-    def test_invalid_tree_height_is_rejected(self):
-        with self.assertRaises(ValueError):
-            solve_subproblem_3(37, 100, -1)
-
-    def test_empty_bird_list_is_rejected(self):
-        with self.assertRaises(ValueError):
-            solve_subproblem_4([])
-
     def test_compare_returns_six_angles(self):
         results = compare_angles(10)
         self.assertEqual(len(results), 6)
+
+    def test_question_1_returns_range_formula(self):
+        solution = solve_question(1, 37, 10, 10, 0)
+        self.assertIn("sin(2θ)", solution["formula"])
+        self.assertEqual(round(solution["value"], 1), 9.6)
+
+    def test_question_2_returns_maximum_rise(self):
+        solution = solve_question(2, 30, 20, 10, 0)
+        self.assertAlmostEqual(solution["value"], 5.0, places=6)
+
+    def test_question_3_returns_flight_time(self):
+        solution = solve_question(3, 30, 20, 10, 0)
+        self.assertAlmostEqual(solution["value"], 2.0, places=6)
+
+    def test_question_4_returns_velocity_components(self):
+        solution = solve_question(4, 60, 20, 10, 0)
+        self.assertAlmostEqual(solution["value"]["vx"], 10.0, places=6)
+        self.assertAlmostEqual(solution["value"]["vy"], 17.320508, places=5)
+
+    def test_invalid_question_is_rejected(self):
+        with self.assertRaises(ValueError):
+            solve_question(5, 37, 10, 10, 0)
 
 
 if __name__ == "__main__":
